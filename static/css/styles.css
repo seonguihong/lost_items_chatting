@@ -1,0 +1,36 @@
+/* styles.css */
+.left-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.left-column img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: auto;
+}
+
+.right-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.logo {
+    max-width: 150px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .left-column {
+        height: auto;
+    }
+
+    .right-column {
+        height: auto;
+    }
+}

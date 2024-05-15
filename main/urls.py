@@ -20,10 +20,14 @@ from django.views.generic.base import RedirectView
 from django.urls import reverse_lazy
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+from .views import signup_view, redirect_to_login  # signup_view와 redirect_to_login을 임포트
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', include('login.urls')),
+    path('login/', auth_views.LoginView.as_view(template_name='login/login.html'), name='login'),
+    path('signup/', signup_view, name='signup'),
     path('chatbot/', include('chatbot.urls')),
     path('', RedirectView.as_view(url=reverse_lazy('login')), name='home'),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('redirect-to-login/', redirect_to_login, name='redirect_to_login'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
