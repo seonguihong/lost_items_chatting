@@ -16,18 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic.base import RedirectView
-from django.urls import reverse_lazy
-from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from .views import signup_view, redirect_to_login  # signup_view와 redirect_to_login을 임포트
+from chatbot.views import home
+from .views import redirect_after_login, signup
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', auth_views.LoginView.as_view(template_name='login/login.html'), name='login'),
-    path('signup/', signup_view, name='signup'),
+    path('signup/', signup, name='signup'),
+    path('accounts/profile/', redirect_after_login, name='redirect_after_login'),
+    path('', home, name='home'),
     path('chatbot/', include('chatbot.urls')),
-    path('', RedirectView.as_view(url=reverse_lazy('login')), name='home'),
-    path('redirect-to-login/', redirect_to_login, name='redirect_to_login'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
