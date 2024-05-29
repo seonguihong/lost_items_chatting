@@ -1,10 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chatbot Home</title>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/chatbot_styles.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Welcome to the Chatbot Home Page</h1>
-    <p>This is the chatbot home page.</p>
+    <div class="chat_wrap" id="chat_wrap">
+        <div class="chat_header">
+            <span>분실물찾기 챗봇</span>
+            <button type="button" id="close_chat_btn" class="close_btn">X</button>
+        </div>
+        <div id="chat_content" class="chat_content"></div>
+        <form id="chat_form">
+            <input type="text" name="message" id="chat_input" class="chat_input" />
+            <input type="button" value="전송" id="send_btn" class="send_btn" />
+        </form>
+    </div>
+    <script>
+        $(document).ready(function() {
+            function appendMessage(content, type) {
+                const messageBox = $('<div>').addClass('msg_box ' + type);
+                const messageContent = $('<span>').html(content);
+                messageBox.append(messageContent);
+                $('#chat_content').append(messageBox);
+                $('#chat_content').scrollTop($('#chat_content')[0].scrollHeight);
+            }
+
+            function sendMessage() {
+                const message = $('#chat_input').val();
+                if (message.trim() === '') return;
+
+                appendMessage(message, 'send');
+
+                $.ajax({
+                    url: '{% url "search_lost_item" %}',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        message: message,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (Array.isArray(response.response)) {
+                            response.response.forEach(item => {
+                                const itemHtml = `
+                                    <div>
+                                        <strong>Name:</strong> ${item.name}<br>
+                                        <strong>Category:</strong> ${item.category}<br>
+                                        <strong>Color:</strong> ${item.color}<br>
+                                        <strong>Lost Date:</strong> ${item.lost_date}<br>
+                                        <strong>Found Location:</strong> ${item.found_location}<br>
+                                        ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}" style="max-width: 100px; max-height: 100px;">` : ''}
+                                    </div>
+                                `;
+                                appendMessage(itemHtml, 'receive');
+                            });
+                        } else {
+                            appendMessage(response.response, 'receive');
+                        }
+                    },
+                    error: function() {
+                        appendMessage('Error: 메시지를 보낼 수 없습니다.', 'receive');
+                    }
+                });
+
+                $('#chat_input').val('');
+            }
+
+            $('#send_btn').on('click', sendMessage);
+
+            $('#chat_form').on('submit', function(event) {
+                event.preventDefault();
+                sendMessage();
+            });
+
+            $('#close_chat_btn').on('click', function() {
+                $('#chat_wrap').hide();
+            });
+        });
+    </script>
 </body>
 </html>
