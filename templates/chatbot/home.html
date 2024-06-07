@@ -13,14 +13,29 @@
             <span>분실물찾기 챗봇</span>
             <button type="button" id="close_chat_btn" class="close_btn">X</button>
         </div>
-        <div id="chat_content" class="chat_content"></div>
+        <div id="chat_content" class="chat_content">
+            <!-- 첫 인사말 -->
+            <div class="msg_box receive">
+                <span>안녕하세요 어떤 물건을 찾으시나요?</span>
+            </div>
+        </div>
         <form id="chat_form">
             <input type="text" name="message" id="chat_input" class="chat_input" />
             <input type="button" value="전송" id="send_btn" class="send_btn" />
         </form>
+        <div id="calendar_widget" style="display: none;">
+            <label for="calendar">잃어버린 날짜는 언제인가요?</label>
+            <input type="date" id="search_date" class="chat_input" />
+            <input type="button" value="확인" id="confirm_date_btn" class="send_btn" />
+        </div>
     </div>
     <script>
         $(document).ready(function() {
+            let currentIndex = 0;
+            let items = [];
+            let searchDate = null;
+            let searchQuery = null;
+
             function appendMessage(content, type) {
                 const messageBox = $('<div>').addClass('msg_box ' + type);
                 const messageContent = $('<span>').html(content);
@@ -29,37 +44,72 @@
                 $('#chat_content').scrollTop($('#chat_content')[0].scrollHeight);
             }
 
-            function sendMessage() {
-                const message = $('#chat_input').val();
-                if (message.trim() === '') return;
+            function displayItems(startIndex) {
+                $('#chat_content .item-list, #chat_content .navigation').remove();
+                const itemList = $('<div>').addClass('item-list');
+                const endIndex = Math.min(startIndex + 2, items.length);
+                for (let i = startIndex; i < endIndex; i++) {
+                    const item = items[i];
+                    const itemDiv = $('<div>').addClass('item');
+                    const itemHtml = `
+                        <div>
+                            <strong>Name:</strong> ${item.name}<br>
+                            <strong>Category:</strong> ${item.category}<br>
+                            <strong>Color:</strong> ${item.color}<br>
+                            <strong>Lost Date:</strong> ${item.lost_date}<br>
+                            <strong>Found Location:</strong> ${item.found_location}<br>
+                            ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}" style="max-width: 100px; max-height: 100px;">` : ''}
+                        </div>
+                    `;
+                    itemDiv.html(itemHtml);
+                    itemList.append(itemDiv);
 
-                appendMessage(message, 'send');
+                    itemDiv.on('click', function() {
+                        $(this).find('img').toggle();
+                        $(this).find('.item-details').toggle();
+                    });
+                }
+
+                const navigation = $('<div>').addClass('navigation');
+                const prevBtn = $('<button>').addClass('nav-btn').text('이전').prop('disabled', startIndex === 0);
+                const nextBtn = $('<button>').addClass('nav-btn').text('다음').prop('disabled', endIndex >= items.length);
+
+                prevBtn.on('click', function() {
+                    currentIndex = (currentIndex - 2 + items.length) % items.length;
+                    displayItems(currentIndex);
+                });
+
+                nextBtn.on('click', function() {
+                    currentIndex = (currentIndex + 2) % items.length;
+                    displayItems(currentIndex);
+                });
+
+                navigation.append(prevBtn).append(nextBtn);
+                $('#chat_content').append(itemList).append(navigation);
+                $('#chat_content').scrollTop($('#chat_content')[0].scrollHeight);
+            }
+
+            function searchItems() {
+                if (!searchQuery || !searchDate) return;
 
                 $.ajax({
                     url: '{% url "search_lost_item" %}',
                     type: 'POST',
                     dataType: 'json',
                     data: {
-                        message: message,
+                        message: searchQuery,
+                        search_date: searchDate,
                         csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
                     success: function(response) {
-                        if (Array.isArray(response.response)) {
-                            response.response.forEach(item => {
-                                const itemHtml = `
-                                    <div>
-                                        <strong>Name:</strong> ${item.name}<br>
-                                        <strong>Category:</strong> ${item.category}<br>
-                                        <strong>Color:</strong> ${item.color}<br>
-                                        <strong>Lost Date:</strong> ${item.lost_date}<br>
-                                        <strong>Found Location:</strong> ${item.found_location}<br>
-                                        ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}" style="max-width: 100px; max-height: 100px;">` : ''}
-                                    </div>
-                                `;
-                                appendMessage(itemHtml, 'receive');
-                            });
-                        } else {
+                        if (typeof response.response === 'string') {
                             appendMessage(response.response, 'receive');
+                        } else if (Array.isArray(response.response)) {
+                            items = response.response;
+                            currentIndex = 0;
+                            displayItems(currentIndex);
+                        } else {
+                            appendMessage('Unknown response format', 'receive');
                         }
                     },
                     error: function() {
@@ -68,17 +118,41 @@
                 });
 
                 $('#chat_input').val('');
+                $('#calendar_widget').hide();
+                searchQuery = null;
+                searchDate = null;
             }
 
-            $('#send_btn').on('click', sendMessage);
+            $('#send_btn').on('click', function() {
+                const message = $('#chat_input').val();
+                if (message.trim() === '') return;
+
+                appendMessage(message, 'send');
+
+                if (!searchQuery) {
+                    searchQuery = message;
+                    $('#chat_input').val('');
+                    $('#calendar_widget').show();
+                } else {
+                    searchItems();
+                }
+            });
 
             $('#chat_form').on('submit', function(event) {
                 event.preventDefault();
-                sendMessage();
+                $('#send_btn').click();
             });
 
             $('#close_chat_btn').on('click', function() {
                 $('#chat_wrap').hide();
+            });
+
+            $('#confirm_date_btn').on('click', function() {
+                searchDate = $('#search_date').val();
+                if (searchDate) {
+                    appendMessage(`잃어버린 날짜는 ${searchDate} 입니다.`, 'receive');
+                    searchItems();
+                }
             });
         });
     </script>

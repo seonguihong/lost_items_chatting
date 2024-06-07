@@ -1,19 +1,23 @@
 .chat_wrap {
     display: block;
-    width: 350px;
-    height: 500px;
+    width: 100%;
+    max-width: 600px;
+    height: 70vh;
     position: fixed;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     background: #a9bdce;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .chat_content {
-    height: 400px;
+    height: calc(100% - 150px);
     padding: 10px 15px;
     background: cornflowerblue;
     overflow-y: scroll;
+    border-radius: 10px 10px 0 0;
 }
 
 .chat_input {
@@ -31,6 +35,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-radius: 10px 10px 0 0;
 }
 
 .chat_header .close_btn {
@@ -62,7 +67,7 @@
     padding: 3px 5px;
     word-break: break-all;
     display: block;
-    max-width: 300px;
+    max-width: 100%;
     margin-bottom: 10px;
     border-radius: 4px;
 }
@@ -83,4 +88,51 @@
     padding: 10px;
     background: #e1e1e1;
     border-top: 1px solid #ccc;
+    border-radius: 0 0 10px 10px;
+}
+
+.item-list {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.item {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    width: calc(50% - 20px);
+    box-sizing: border-box;
+    background: #fff; /* 박스 배경색을 흰색으로 설정 */
+}
+
+.item img {
+    display: block;
+    max-width: 100%;
+    max-height: 100px;
+    margin-top: 10px;
+}
+
+.item-details {
+    display: none;
+}
+
+.msg_box.receive .item {
+    background: #fff;
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.nav-btn {
+    padding: 5px 10px;
+    background: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
 }
