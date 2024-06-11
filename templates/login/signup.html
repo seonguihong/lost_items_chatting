@@ -1,17 +1,46 @@
 {% extends 'base.html' %}
-
-{% block title %}Signup{% endblock %}
-
 {% block content %}
-<div class="text-center">
-    <div class="card">
-        <h2 class="text-center">Signup</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary btn-block">Signup</button>
-        </form>
-        <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+<div class="wrapper">
+    <h2 class="text-center">Sign Up</h2>
+    <br>
+    <form method="post" action="{% url 'signup' %}">
+        {% csrf_token %}
+        {% if form.errors %}
+<div class="alert alert-danger">
+    {% for field in form %}
+    <!-- 필드 오류 -->
+    {% if field.errors %}
+    <div>
+        <strong>{{ field.label }}</strong>
+        {{ field.errors }}
     </div>
+    {% endif %}
+    {% endfor %}
+    <!-- 넌필드 오류 -->
+    {% for error in form.non_field_errors %}
+    <div>
+        <strong>{{ error }}</strong>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+        <div class="mb-3">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" name="username" id="username"
+                   value="{{ form.username.value|default_if_none:'' }}">
+        </div>
+        <div class="mb-3">
+            <label for="password1">Password</label>
+            <input type="password" class="form-control" name="password1" id="password1"
+                   value="{{ form.password1.value|default_if_none:'' }}">
+        </div>
+        <div class="mb-3">
+            <label for="password2">Check Password</label>
+            <input type="password" class="form-control" name="password2" id="password2"
+                   value="{{ form.password2.value|default_if_none:'' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Signup</button>
+    </form>
+    <p class="text-center mt-3">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
 </div>
 {% endblock %}

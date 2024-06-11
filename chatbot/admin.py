@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import LostItem
+from django.contrib import admin
 
 @admin.register(LostItem)
 class LostItemAdmin(admin.ModelAdmin):
