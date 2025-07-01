@@ -53,25 +53,6 @@
 - Django Templates & Static/Media 파일 관리
 - **Database:** Django 기본 SQLite3
 
----
-
-## 📁 폴더 구조
-
-lost_items_chatting/
-├── chatbot/ # 챗봇 및 검색 로직
-├── login/ # 사용자/관리자 인증 앱
-├── main/ # 메인 라우팅/설정
-├── media/lost_items # 분실물 이미지 저장
-├── static/ # 정적 파일 (css, js, images)
-├── templates/ # HTML 템플릿
-├── manage.py
-└── README.md
-
-yaml
-복사
-편집
-
----
 
 ## ⚡️ 설치 및 실행 방법
 
